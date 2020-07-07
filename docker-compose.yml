@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+    db:
+        image: mysql:5.7
+        volumes:
+            - ./db_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: password
+            MYSQL_DATABASE: wordpress
+            MYSQL_USER: wordpress
+            MYSQL_PASSWORD: wordpress
+        networks:
+            bedrock-wp:
+                aliases: 
+                    - db
+    wordpress:
+        depends_on:
+            - db
+        image: php:7-fpm
+        environment:
+            WORDPRESS_DB_HOST: db:3306
+            WORDPRESS_DB_USER: wordpress
+            WORDPRESS_DB_PASSWORD: wordpress
+        volumes:
+            - ./bedrock:/var/www/html
+        networks:
+            bedrock-wp:
+                aliases: 
+                    - wordpress
+    nginx:
+        depends_on: 
+            - wordpress
+        build: ./nginx/.
+        ports:
+            - "8080:80"
+        networks:
+            bedrock-wp:
+                aliases: 
+                    - nginx
+
+networks:
+    bedrock-wp:
+        
